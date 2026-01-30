@@ -1,0 +1,94 @@
+.my-orders {
+  color: white;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.orders-header h2 {
+  font-size: 36px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.view-toggle button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.view-toggle button.active {
+  background: white;
+  color: #667eea;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 25px;
+  color: #333;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.order-header h3 {
+  font-size: 20px;
+  color: #667eea;
+}
+
+.order-status {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-0 { background: #fff3cd; color: #856404; }
+.status-1 { background: #d1ecf1; color: #0c5460; }
+.status-2 { background: #d4edda; color: #155724; }
+.status-3 { background: #f8d7da; color: #721c24; }
+.status-4 { background: #e2e3e5; color: #383d41; }
+
+.order-requirements {
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.order-details {
+  display: flex;
+  gap: 20px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.order-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.approve {
+  background: #28a745;
+  color: white;
+}
+
+.reject {
+  background: #dc3545;
+  color: white;
+}
