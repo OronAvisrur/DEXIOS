@@ -27,29 +27,23 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
       const hasProfile = await nft.methods.hasProfile(account).call();
       
       if (!hasProfile) {
-        alert('You need a seller profile first. Creating one...');
-        await marketplace.methods.createGig(
-          formData.title,
-          formData.description,
-          formData.aiModel,
-          toWei(formData.price),
-          formData.deliveryTime
-        ).send({ from: account });
-      } else {
-        await marketplace.methods.createGig(
-          formData.title,
-          formData.description,
-          formData.aiModel,
-          toWei(formData.price),
-          formData.deliveryTime
-        ).send({ from: account });
+        alert('Creating seller profile first...');
+        await nft.methods.mintProfile(account).send({ from: account });
       }
+
+      await marketplace.methods.createGig(
+        formData.title,
+        formData.description,
+        formData.aiModel,
+        toWei(formData.price),
+        formData.deliveryTime
+      ).send({ from: account });
 
       alert('Gig created successfully!');
       setView('my-gigs');
     } catch (error) {
       console.error('Error creating gig:', error);
-      alert('Failed to create gig');
+      alert('Failed to create gig: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }

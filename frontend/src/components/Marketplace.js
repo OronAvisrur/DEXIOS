@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Marketplace.css';
-import { fromWei, toWei } from '../utils/web3';
+import { fromWei } from '../utils/web3';
 
 const Marketplace = ({ marketplace, token, account }) => {
   const [gigs, setGigs] = useState([]);
@@ -14,13 +14,18 @@ const Marketplace = ({ marketplace, token, account }) => {
     if (!marketplace) return;
     
     try {
-      const gigCount = await marketplace.methods._gigIdCounter().call();
+      let gigId = 1;
       const loadedGigs = [];
       
-      for (let i = 1; i <= gigCount; i++) {
-        const gig = await marketplace.methods.getGig(i).call();
-        if (gig.isActive) {
-          loadedGigs.push(gig);
+      while (true) {
+        try {
+          const gig = await marketplace.methods.getGig(gigId).call();
+          if (gig.isActive) {
+            loadedGigs.push(gig);
+          }
+          gigId++;
+        } catch (error) {
+          break;
         }
       }
       
@@ -37,13 +42,17 @@ const Marketplace = ({ marketplace, token, account }) => {
       const requirements = prompt('Enter your requirements:');
       if (!requirements) return;
 
+      setLoading(true);
       await token.methods.approve(marketplace.options.address, price).send({ from: account });
       await marketplace.methods.placeOrder(gigId, requirements).send({ from: account });
       
       alert('Order placed successfully!');
+      loadGigs();
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order');
+      alert('Failed to place order: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
