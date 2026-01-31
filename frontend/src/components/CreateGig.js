@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import './CreateGig.css';
+import { useContracts } from '../hooks/useContracts';
+import { useWeb3 } from '../hooks/useWeb3';
 import { toWei } from '../utils/web3';
+import Loading from './Loading';
+import './CreateGig.css';
 
-const CreateGig = ({ marketplace, nft, account, setView }) => {
+const CreateGig = ({ showToast }) => {
+  const { account } = useWeb3();
+  const { marketplace, sellerNFT } = useContracts();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -10,7 +16,6 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
     price: '',
     deliveryTime: ''
   });
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,38 +26,54 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
+    if (!formData.title || !formData.description || !formData.aiModel || !formData.price || !formData.deliveryTime) {
+      showToast('Please fill all fields', 'error');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const hasProfile = await nft.methods.hasProfile(account).call();
+      const hasProfile = await sellerNFT.methods.balanceOf(account).call();
       
-      if (!hasProfile) {
-        alert('Creating seller profile first...');
-        await nft.methods.mintProfile(account).send({ from: account });
+      if (hasProfile === '0') {
+        showToast('Minting seller profile NFT...', 'info');
+        await sellerNFT.methods.mintProfile().send({ from: account });
+        showToast('Profile created successfully!', 'success');
       }
 
+      showToast('Creating gig...', 'info');
+      const priceInWei = toWei(formData.price);
+      
       await marketplace.methods.createGig(
         formData.title,
         formData.description,
         formData.aiModel,
-        toWei(formData.price),
+        priceInWei,
         formData.deliveryTime
       ).send({ from: account });
 
-      alert('Gig created successfully!');
-      setView('my-gigs');
+      showToast('Gig created successfully!', 'success');
+      setFormData({
+        title: '',
+        description: '',
+        aiModel: '',
+        price: '',
+        deliveryTime: ''
+      });
     } catch (error) {
-      console.error('Error creating gig:', error);
-      alert('Failed to create gig: ' + (error.message || 'Unknown error'));
+      console.error('Create gig error:', error);
+      showToast('Failed to create gig: ' + error.message, 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading) return <Loading message="Creating your gig..." />;
+
   return (
     <div className="create-gig">
-      <h2>Create New Gig</h2>
-      
+      <h1>Create New Gig</h1>
       <form onSubmit={handleSubmit} className="gig-form">
         <div className="form-group">
           <label>Title</label>
@@ -62,7 +83,6 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
             value={formData.title}
             onChange={handleChange}
             placeholder="e.g., AI Logo Design with DALL-E 3"
-            required
           />
         </div>
 
@@ -72,25 +92,23 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe your service in detail..."
-            rows="4"
-            required
+            placeholder="Describe your service..."
+            rows="5"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>AI Model</label>
+          <input
+            type="text"
+            name="aiModel"
+            value={formData.aiModel}
+            onChange={handleChange}
+            placeholder="e.g., GPT-4, DALL-E 3, Midjourney"
           />
         </div>
 
         <div className="form-row">
-          <div className="form-group">
-            <label>AI Model</label>
-            <input
-              type="text"
-              name="aiModel"
-              value={formData.aiModel}
-              onChange={handleChange}
-              placeholder="e.g., GPT-4, DALL-E 3"
-              required
-            />
-          </div>
-
           <div className="form-group">
             <label>Price (DXIO)</label>
             <input
@@ -101,7 +119,6 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
               placeholder="50"
               min="1"
               step="0.01"
-              required
             />
           </div>
 
@@ -114,13 +131,12 @@ const CreateGig = ({ marketplace, nft, account, setView }) => {
               onChange={handleChange}
               placeholder="24"
               min="1"
-              required
             />
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="submit-button">
-          {loading ? 'Creating...' : 'Create Gig'}
+        <button type="submit" className="submit-btn">
+          Create Gig
         </button>
       </form>
     </div>
