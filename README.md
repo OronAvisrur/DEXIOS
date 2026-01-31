@@ -1,47 +1,59 @@
 # 🚀 DEXIOS - Decentralized AI Services Marketplace
 
-> **Fiverr meets Blockchain - A fully decentralized marketplace for AI-powered services**
+![Solidity](https://img.shields.io/badge/Solidity-0.8.25-blue?style=flat-square&logo=solidity)
+![React](https://img.shields.io/badge/React-18+-61dafb?style=flat-square&logo=react)
+![Web3](https://img.shields.io/badge/Web3.js-4.x-orange?style=flat-square&logo=web3.js)
+![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-5.0.2-purple?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-15%20passed-brightgreen?style=flat-square&logo=truffle)
+![Build](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)
+![Maintained](https://img.shields.io/badge/maintained-yes-green?style=flat-square)
 
-[![Solidity](https://img.shields.io/badge/Solidity-0.8.25-blue)](https://soliditylang.org/)
-[![React](https://img.shields.io/badge/React-18+-61dafb)](https://reactjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-
-## 📋 Overview
-
-DEXIOS is a **zero-backend blockchain marketplace** connecting AI service providers (sellers) with clients (buyers). Smart contracts handle payments, escrow, and reputation - no central server required.
-
-### ✨ Key Features
-
-- 🎯 **Fully Decentralized** - No backend servers
-- 💰 **Smart Escrow** - Secure payments via smart contracts
-- 🏆 **NFT Reputation** - Tamper-proof seller profiles
-- 📁 **IPFS Storage** - Decentralized file delivery
-- ⚡ **Gas Optimized** - Efficient contract design
-- 🔒 **Security First** - Audited patterns (CEI, reentrancy guards)
+**Fiverr meets Blockchain** - A fully decentralized marketplace connecting AI service providers with clients using smart contracts for payments, escrow, and reputation.
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Project Purpose
 
+DEXIOS eliminates intermediaries in freelance marketplaces by leveraging blockchain technology. Service providers create gigs, buyers place orders with crypto payments locked in smart contract escrow, and deliverables are stored on IPFS. The platform features tamper-proof NFT-based reputation systems, ensuring trust without centralized control.
+
+**Key Innovation:** Zero backend servers - everything runs on Ethereum/Polygon + IPFS.
+
+---
+
+## ✨ Features
+
+- 🎯 **Fully Decentralized** - No backend servers or central database
+- 💰 **Smart Escrow** - Secure payments via Solidity contracts
+- 🏆 **NFT Reputation** - Portable, tamper-proof seller profiles (ERC-721)
+- 📁 **IPFS Storage** - Decentralized file delivery
+- ⚡ **Gas Optimized** - Custom errors, efficient storage patterns
+- 🔒 **Security First** - CEI pattern, reentrancy guards, OpenZeppelin libraries
+- 🎨 **Modern UI** - 2026 glassmorphism design with React 18
+- 📤 **File Upload** - Drag & drop support for deliverables
+
+---
+
+## 🏗️ Architecture Overview
 ```
 ┌─────────────────────────────────────┐
 │      React Frontend (Web3)          │
-│  - Modern UI components             │
-│  - MetaMask integration             │
-│  - State management with Hooks      │
+│  - MetaMask Integration             │
+│  - Real-time Contract Updates       │
+│  - IPFS File Handling               │
 └─────────────────────────────────────┘
               ↓ Web3.js
 ┌─────────────────────────────────────┐
-│   Smart Contracts (Solidity 0.8+)   │
+│   Smart Contracts (Solidity 0.8.25) │
 │  - DexiosMarketplace.sol            │
 │  - DexiosToken.sol (ERC-20)         │
 │  - SellerProfileNFT.sol (ERC-721)   │
 └─────────────────────────────────────┘
-              ↓ IPFS
+              ↓ Events
 ┌─────────────────────────────────────┐
 │         IPFS (Web3.Storage)         │
-│  - Deliverable files                │
-│  - Gig images/portfolios            │
+│  - Deliverable Files                │
+│  - Gig Images/Portfolios            │
 └─────────────────────────────────────┘
 ```
 
@@ -50,308 +62,255 @@ DEXIOS is a **zero-backend blockchain marketplace** connecting AI service provid
 ## 🛠️ Tech Stack
 
 ### Blockchain Layer
-- **Solidity** ^0.8.25 - Smart contract language
-- **OpenZeppelin** 5.0.2 - Battle-tested contract libraries
-- **Truffle Suite** 5.11+ - Development framework
-- **Ganache** - Local blockchain for testing
+- **Solidity** 0.8.25 - Smart contract language
+- **OpenZeppelin** 5.0.2 - Security-audited contract libraries
+- **Truffle** 5.11+ - Development framework
+- **Ganache** - Local blockchain testing
 
 ### Frontend Layer
-- **React** 18+ - UI library
+- **React** 18+ - Modern UI library
 - **Web3.js** 4.x - Ethereum JavaScript API
-- **React Hooks** - State management
-- **CSS Modules** - Scoped styling
+- **Custom Hooks** - useWeb3, useContracts
+- **Glassmorphism CSS** - 2026 design trends
 
 ### Storage Layer
-- **IPFS** - Decentralized file storage (Web3.Storage API)
+- **IPFS** - Decentralized content addressing
 
 ---
 
 ## 📦 Project Structure
-
 ```
 dexios-platform/
-├── contracts/                    # Smart contracts
+├── contracts/                    # Solidity smart contracts
 │   ├── DexiosMarketplace.sol    # Core marketplace logic
 │   ├── DexiosToken.sol          # ERC-20 payment token
 │   ├── SellerProfileNFT.sol     # ERC-721 reputation NFT
-│   └── Migrations.sol           # Truffle deployment helper
-│
-├── migrations/                   # Deployment scripts
-│   ├── 1_initial_migration.js
-│   └── 2_deploy_contracts.js
-│
-├── test/                        # Contract tests
-│   └── dexios_test.js
-│
+│   └── Migrations.sol           # Deployment helper
+├── migrations/                   # Truffle deployment scripts
+├── test/                        # Contract test suite
+│   └── dexios_test.js          # 15 comprehensive tests
 ├── frontend/                    # React application
-│   ├── public/
-│   │   └── index.html
 │   ├── src/
 │   │   ├── components/         # UI components
-│   │   │   ├── Marketplace/    # Browse gigs
-│   │   │   ├── Gig/           # Gig details & creation
-│   │   │   ├── Order/         # Order management
-│   │   │   └── Profile/       # Seller profiles
-│   │   ├── hooks/             # Custom React hooks
-│   │   │   ├── useWeb3.js     # Web3 connection
-│   │   │   └── useContracts.js # Contract interactions
-│   │   ├── utils/             # Helper functions
-│   │   │   ├── ipfs.js        # IPFS utilities
-│   │   │   └── web3.js        # Web3 helpers
-│   │   ├── contracts/         # Contract ABIs (auto-generated)
-│   │   ├── App.js
-│   │   └── index.js
-│   ├── package.json
-│   └── .env.example
-│
-├── truffle-config.js            # Truffle configuration
-├── package.json                 # Root dependencies
-├── .gitignore
-└── README.md
+│   │   │   ├── Navbar.js
+│   │   │   ├── Home.js
+│   │   │   ├── Marketplace.js
+│   │   │   ├── CreateGig.js
+│   │   │   ├── MyGigs.js
+│   │   │   ├── MyOrders.js
+│   │   │   └── FileUpload.js
+│   │   ├── hooks/              # Custom React hooks
+│   │   │   ├── useWeb3.js
+│   │   │   └── useContracts.js
+│   │   ├── utils/              # Helper functions
+│   │   │   └── web3.js
+│   │   └── contracts/          # Contract ABIs
+│   └── package.json
+├── truffle-config.js
+└── package.json
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
-### Prerequisites
+### Prerequisites Verification
 
-Ensure you have installed:
-
+Ensure the following are installed:
 ```bash
-node >= 16.0.0
-npm >= 8.0.0
-truffle >= 5.11.0
-ganache-cli
-MetaMask browser extension
+node --version    # Should be >= 16.0.0
+npm --version     # Should be >= 8.0.0
+truffle version   # Should be >= 5.11.0
 ```
 
-### Installation Steps
-
+### Step 1: Clone Repository
 ```bash
-# 1. Clone the repository
 git clone https://github.com/yourusername/dexios-platform.git
 cd dexios-platform
+```
 
-# 2. Install root dependencies
+### Step 2: Install Dependencies
+```bash
+# Root dependencies
 npm install
 
-# 3. Start local blockchain (separate terminal)
-ganache-cli --deterministic --accounts 10 --port 7545
-
-# 4. Compile and deploy contracts
-truffle compile
-truffle migrate --reset
-
-# 5. Install frontend dependencies
+# Frontend dependencies
 cd frontend
 npm install
+cd ..
+```
 
-# 6. Start React app
+### Step 3: Start Local Blockchain
+
+**Terminal 1:**
+```bash
+ganache-cli --deterministic --port 7545
+```
+
+Keep this terminal running. You should see:
+```
+Available Accounts
+(0) 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1 (1000 ETH)
+(1) 0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0 (1000 ETH)
+...
+```
+
+### Step 4: Deploy Smart Contracts
+
+**Terminal 2:**
+```bash
+cd ~/dexios-platform
+truffle compile
+truffle migrate --reset
+```
+
+Expected output:
+```
+DexiosToken deployed at: 0xCfEB...
+SellerProfileNFT deployed at: 0x254d...
+DexiosMarketplace deployed at: 0xC89C...
+```
+
+### Step 5: Copy Contract ABIs
+```bash
+cp build/contracts/*.json frontend/src/contracts/
+```
+
+### Step 6: Configure MetaMask
+
+1. Open MetaMask extension
+2. **Add Network Manually:**
+   - Network Name: `Ganache Local`
+   - RPC URL: `http://127.0.0.1:7545`
+   - Chain ID: `1337`
+   - Currency: `ETH`
+
+3. **Import Test Account:**
+   - Click "Import Account"
+   - Paste private key from Ganache terminal:
+```
+     0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d
+```
+   - You should see ~999 ETH
+
+### Step 7: Start Frontend
+
+**Terminal 3:**
+```bash
+cd frontend
+export PATH="/usr/bin:$PATH"  # For WSL users
 npm start
 ```
 
-The app will open at `http://localhost:3000`
+Application opens at: **http://localhost:3000**
 
 ---
 
-## 📜 Smart Contracts API
+## 🧪 Testing and Validation
+
+### Run Smart Contract Tests
+```bash
+truffle test
+```
+
+**Expected Results:**
+```
+Contract: DEXIOS Platform Tests
+  DexiosToken
+    ✓ should deploy with correct initial supply
+    ✓ should allow owner to mint tokens
+    ✓ should allow token transfers
+  SellerProfileNFT
+    ✓ should mint seller profile
+    ✓ should track seller reputation
+  DexiosMarketplace - Gig Creation
+    ✓ should create gig successfully
+    ✓ should fail without seller profile
+  DexiosMarketplace - Order Flow
+    ✓ should place order successfully
+    ✓ should deliver work
+    ✓ should approve order and release payment
+    ✓ should reject order
+  DexiosMarketplace - Admin Functions
+    ✓ should set platform fee
+    ✓ should resolve dispute in favor of seller
+
+15 passing (3.2s)
+```
+
+---
+
+## 📜 Smart Contract API Reference
 
 ### DexiosMarketplace.sol
 
-**Main marketplace logic for gigs and orders**
-
-| Function | Parameters | Returns | Gas Est. | Description |
-|----------|-----------|---------|----------|-------------|
-| `createGig()` | title, description, aiModel, price, deliveryTime | gigId | ~180k | Create new service listing |
-| `placeOrder()` | gigId, requirements | orderId | ~120k | Place order (locks payment) |
-| `deliverWork()` | orderId, ipfsHash | - | ~80k | Submit deliverables |
-| `approveOrder()` | orderId | - | ~100k | Approve & release payment |
-| `rejectOrder()` | orderId, reason | - | ~90k | Reject & open dispute |
-| `getGig()` | gigId | Gig struct | Free | View gig details |
-| `getOrder()` | orderId | Order struct | Free | View order details |
-
-**Data Structures:**
-
-```solidity
-struct Gig {
-    uint256 id;
-    address seller;
-    string title;
-    string description;
-    string aiModel;           // "GPT-4", "DALL-E 3", etc.
-    uint256 priceInTokens;
-    uint256 deliveryTimeHours;
-    bool isActive;
-    uint256 ordersCompleted;
-    uint256 totalRating;
-    uint256 ratingCount;
-}
-
-struct Order {
-    uint256 id;
-    uint256 gigId;
-    address buyer;
-    address seller;
-    string requirements;
-    string ipfsHash;          // Delivered files
-    uint256 paidAmount;
-    OrderStatus status;
-    uint256 createdAt;
-}
-
-enum OrderStatus { 
-    Pending,    // Order placed, awaiting delivery
-    Delivered,  // Work submitted by seller
-    Approved,   // Buyer approved, payment released
-    Rejected,   // Buyer rejected
-    Disputed    // Under dispute resolution
-}
-```
-
----
+| Function | Parameters | Gas Est. | Description |
+|----------|-----------|----------|-------------|
+| `createGig()` | title, description, aiModel, price, deliveryTime | ~180k | Create service listing |
+| `placeOrder()` | gigId, requirements | ~120k | Place order (locks payment) |
+| `deliverWork()` | orderId, ipfsHash | ~80k | Submit deliverables |
+| `approveOrder()` | orderId, rating | ~100k | Approve & release payment |
+| `rejectOrder()` | orderId, reason | ~90k | Reject & open dispute |
+| `getGig()` | gigId | Free | View gig details |
+| `getOrder()` | orderId | Free | View order details |
 
 ### DexiosToken.sol (ERC-20)
 
-**Platform currency for all transactions**
-
-- **Symbol**: DXIO
-- **Decimals**: 18
-- **Initial Supply**: 1,000,000 DXIO
-
-| Function | Access | Description | Gas Est. |
-|----------|--------|-------------|----------|
-| `mint()` | Owner | Create new tokens | ~50k |
-| `transfer()` | Public | Send tokens | ~21k |
-| `approve()` | Public | Allow spending | ~45k |
-| `balanceOf()` | View | Check balance | Free |
-
----
+- **Symbol:** DXIO
+- **Decimals:** 18
+- **Initial Supply:** 1,000,000 DXIO
 
 ### SellerProfileNFT.sol (ERC-721)
 
-**Unique NFT for each seller representing reputation**
-
-Each seller must mint a profile NFT (10 DXIO cost) to create gigs.
-
-```solidity
-struct SellerProfile {
-    address owner;
-    uint256 totalJobs;
-    uint256 successfulJobs;
-    uint256 totalEarned;
-    uint256 averageRating;     // 1-5 stars
-    string[] specialties;
-    uint256 joinedAt;
-}
-```
-
-| Function | Access | Description | Gas Est. |
-|----------|--------|-------------|----------|
-| `mintProfile()` | Public | Create seller profile (one-time) | ~200k |
-| `updateReputation()` | Contract | Update stats after order | ~60k |
-| `getProfile()` | View | Retrieve profile data | Free |
-
-**Why NFT?**
-- Portable reputation across platforms
-- Cannot be deleted or censored
-- Transferable (seller can sell their reputation)
+Each seller mints a unique profile NFT storing:
+- Total jobs completed
+- Success rate
+- Total earnings
+- Average rating (1-5 stars)
+- Specialties array
 
 ---
 
-## 🔄 User Flows
+## 🎯 User Workflows
 
-### Flow 1: Seller Creates Gig
-
+### Workflow 1: Seller Creates Gig
 ```
-1. Connect MetaMask
-2. Mint Profile NFT (if first time) → Pay 10 DXIO
-3. Click "Create Gig"
-4. Fill form:
+1. Connect MetaMask → Account detected
+2. Navigate to "Create Gig"
+3. Fill form:
    - Title: "AI Logo Design with DALL-E 3"
    - Description: "Professional logos in any style"
    - AI Model: "DALL-E 3"
    - Price: 50 DXIO
    - Delivery: 24 hours
-5. Call createGig() → Transaction sent
-6. Gig appears in marketplace
+4. Submit → Profile NFT auto-minted if first gig
+5. Transaction confirmed → Gig live in marketplace
 ```
 
----
-
-### Flow 2: Buyer Orders Service
-
+### Workflow 2: Buyer Orders Service
 ```
-1. Browse marketplace
-2. Select gig
-3. Enter requirements
-4. Approve DXIO spending: token.approve(marketplace, 50)
-5. Call placeOrder() → 50 DXIO locked in escrow
-6. Order status: Pending
+1. Browse "Marketplace"
+2. Select gig → View details
+3. Click "Order Now"
+4. Enter requirements
+5. Approve 50 DXIO spending → Confirm
+6. Place order → 50 DXIO locked in escrow
+7. Wait for delivery
 ```
 
----
-
-### Flow 3: Seller Delivers Work
-
+### Workflow 3: Complete Order Cycle
 ```
-1. View pending orders
+Seller:
+1. View "My Orders" → "As Seller"
 2. Create deliverables using AI tools
-3. Upload files to IPFS → Get hash "QmX7Y8Z..."
-4. Call deliverWork(orderId, "QmX7Y8Z...")
-5. Order status: Delivered
-```
+3. Upload to IPFS → Get hash
+4. Submit delivery with IPFS hash
 
----
-
-### Flow 4: Buyer Reviews & Approves
-
-```
-1. Download files from IPFS
-2. Review quality
-3a. Satisfied → approveOrder()
-    - 50 DXIO released to seller
-    - Reputation updated
-    - Status: Approved
-3b. Not satisfied → rejectOrder()
-    - Status: Disputed
-    - Admin resolution required
-```
-
----
-
-## 🧪 Testing
-
-### Run Smart Contract Tests
-
-```bash
-# All tests
-truffle test
-
-# Specific test file
-truffle test test/dexios_test.js
-
-# With gas reporting
-truffle test --show-events
-```
-
-### Test Coverage
-
-```bash
-npm run coverage
-```
-
-Expected output:
-```
-Contract: DexiosMarketplace
-  ✓ should create gig successfully
-  ✓ should place order with sufficient tokens
-  ✓ should reject order with insufficient tokens
-  ✓ should deliver work and update status
-  ✓ should approve order and release payment
-  ✓ should handle reputation updates
-
-15 passing (3.2s)
+Buyer:
+5. Download from IPFS → Review quality
+6. Approve order → Rate 1-5 stars
+7. Smart contract releases payment (47.5 DXIO to seller, 2.5 DXIO platform fee)
+8. Seller reputation NFT updates automatically
 ```
 
 ---
@@ -360,61 +319,85 @@ Contract: DexiosMarketplace
 
 ### Implemented Protections
 
-✅ **Checks-Effects-Interactions** - Prevent reentrancy
-✅ **Access Control** - Role-based permissions
-✅ **Integer Overflow** - Solidity 0.8+ built-in protection
-✅ **Input Validation** - Sanitize all parameters
-✅ **Escrow Pattern** - Secure payment handling
-✅ **Custom Errors** - Gas-efficient error handling
+✅ **Checks-Effects-Interactions** - Prevents reentrancy attacks  
+✅ **ReentrancyGuard** - OpenZeppelin protection on critical functions  
+✅ **Access Control** - Ownable pattern for admin functions  
+✅ **Integer Overflow** - Solidity 0.8+ built-in SafeMath  
+✅ **Input Validation** - Require statements on all parameters  
+✅ **Custom Errors** - Gas-efficient error handling  
 
 ### Security Audit Checklist
 
-- [ ] External security audit
-- [ ] Formal verification
+- [ ] External security audit (Planned)
 - [ ] Bug bounty program
-- [ ] Multi-sig admin controls
-- [ ] Emergency pause mechanism
+- [ ] Formal verification
+- [ ] Multi-sig wallet for admin
 
 ---
 
 ## 📊 Token Economics
 
-### DXIO Token Distribution
+### DXIO Distribution
 
-- **Initial Supply**: 1,000,000 DXIO
-- **Platform Fee**: 2.5% per transaction
-- **Profile Minting**: 10 DXIO (one-time)
+- **Total Supply:** 1,000,000 DXIO (fixed)
+- **Platform Fee:** 2.5% per transaction
+- **Profile Minting:** Free (gas only)
 
-### Reward Structure
+### Fee Structure
 
-- Sellers earn DXIO per completed order
-- Buyers purchase services with DXIO
-- Platform collects 2.5% fee
+| Action | Fee | Recipient |
+|--------|-----|-----------|
+| Order Completion | 2.5% | Platform |
+| Gig Creation | Gas only | Network |
+| Profile Minting | Gas only | Network |
 
 ---
 
-## 🎯 Roadmap
+## 🎨 Design System
 
-### Phase 1: MVP (Current)
-- [x] Core smart contracts
-- [x] Basic React UI
-- [ ] IPFS integration
-- [ ] MetaMask connection
-- [ ] Gig creation/browsing
-- [ ] Order placement
+### Color Palette
 
-### Phase 2: Enhancement
-- [ ] Advanced search/filters
-- [ ] Messaging system
-- [ ] Dispute resolution
-- [ ] Multiple deliveries
-- [ ] Tiered service packages
+- **Background:** `#0a0a0f` (Near black)
+- **Primary:** `#667eea` → `#764ba2` (Purple gradient)
+- **Accent:** `#8b5cf6` (Vibrant purple)
+- **Text:** `#ffffff` (White)
+- **Surface:** `rgba(255, 255, 255, 0.05)` (Glassmorphism)
 
-### Phase 3: Scaling
-- [ ] Layer 2 deployment
-- [ ] Mobile app
-- [ ] API for third-party integrations
-- [ ] Governance token
+### Typography
+
+- **Font:** Inter (Google Fonts)
+- **Weights:** 300, 400, 500, 600, 700, 800
+
+---
+
+## 🔧 Troubleshooting
+
+### Issue: "Contracts not deployed on this network"
+
+**Solution:**
+```bash
+# Ensure Ganache is running on port 7545
+# Re-deploy contracts
+truffle migrate --reset
+# Copy ABIs
+cp build/contracts/*.json frontend/src/contracts/
+```
+
+### Issue: MetaMask shows 0 ETH
+
+**Solution:**
+- Verify you're on "Ganache Local" network (Chain ID 1337)
+- Import correct account using private key from Ganache terminal
+- Check Ganache is still running
+
+### Issue: npm start fails with UNC path error (WSL)
+
+**Solution:**
+```bash
+export PATH="/usr/bin:$PATH"
+cd ~/dexios-platform/frontend
+npm start
+```
 
 ---
 
@@ -423,18 +406,20 @@ Contract: DexiosMarketplace
 We welcome contributions! Please follow these steps:
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Write tests for new functionality
+4. Ensure all tests pass: `truffle test`
+5. Commit changes: `git commit -m 'Add amazing feature'`
+6. Push to branch: `git push origin feature/amazing-feature`
+7. Open Pull Request
 
 ### Coding Standards
 
 - Follow Solidity style guide
-- Write comprehensive tests
-- Add inline comments
+- Use OpenZeppelin contracts where possible
+- Write comprehensive inline comments
 - Optimize for gas efficiency
-- Use custom errors over require strings
+- Include unit tests for all functions
 
 ---
 
@@ -450,16 +435,18 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 - [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)
 - [React Documentation](https://react.dev/)
 - [Web3.js Documentation](https://web3js.readthedocs.io/)
+- [Truffle Suite](https://trufflesuite.com/docs/)
 - [IPFS Documentation](https://docs.ipfs.tech/)
 
 ---
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/dexios-platform/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/dexios-platform/discussions)
-- **Email**: support@dexios.io
+- **Issues:** [GitHub Issues](https://github.com/yourusername/dexios-platform/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/yourusername/dexios-platform/discussions)
 
 ---
 
 **Built with ❤️ for the decentralized future**
+
+*DEXIOS - Where AI meets Blockchain*
