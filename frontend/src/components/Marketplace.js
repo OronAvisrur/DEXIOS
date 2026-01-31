@@ -1,71 +1,81 @@
 import React, { useState, useEffect } from 'react';
+import { useContracts } from '../hooks/useContracts';
+import { useWeb3 } from '../hooks/useWeb3';
+import { fromWei, toWei } from '../utils/web3';
+import Loading from './Loading';
 import './Marketplace.css';
-import { fromWei } from '../utils/web3';
 
-const Marketplace = ({ marketplace, token, account }) => {
+const Marketplace = ({ showToast }) => {
+  const { account } = useWeb3();
+  const { marketplace, token } = useContracts();
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [orderingGig, setOrderingGig] = useState(null);
+  const [requirements, setRequirements] = useState('');
 
   useEffect(() => {
-    loadGigs();
+    if (marketplace) {
+      loadGigs();
+    }
   }, [marketplace]);
 
   const loadGigs = async () => {
-    if (!marketplace) return;
-    
+    setLoading(true);
     try {
-      let gigId = 1;
-      const loadedGigs = [];
-      
-      while (true) {
-        try {
-          const gig = await marketplace.methods.getGig(gigId).call();
-          if (gig.isActive) {
-            loadedGigs.push(gig);
-          }
-          gigId++;
-        } catch (error) {
-          break;
+      const gigCount = await marketplace.methods.gigCounter().call();
+      const allGigs = [];
+
+      for (let i = 1; i <= gigCount; i++) {
+        const gig = await marketplace.methods.getGig(i).call();
+        if (gig.isActive) {
+          allGigs.push({ id: i, ...gig });
         }
       }
-      
-      setGigs(loadedGigs);
+
+      setGigs(allGigs);
+      showToast('Gigs loaded successfully', 'success');
     } catch (error) {
       console.error('Error loading gigs:', error);
+      showToast('Failed to load gigs', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const placeOrder = async (gigId, price) => {
+  const handlePlaceOrder = async (gigId, price) => {
+    if (!requirements.trim()) {
+      showToast('Please enter requirements', 'error');
+      return;
+    }
+
+    setOrderingGig(gigId);
     try {
-      const requirements = prompt('Enter your requirements:');
-      if (!requirements) return;
+      const allowance = await token.methods.allowance(account, marketplace._address).call();
+      if (BigInt(allowance) < BigInt(price)) {
+        showToast('Approving tokens...', 'info');
+        await token.methods.approve(marketplace._address, price).send({ from: account });
+      }
 
-      setLoading(true);
-      await token.methods.approve(marketplace.options.address, price).send({ from: account });
+      showToast('Placing order...', 'info');
       await marketplace.methods.placeOrder(gigId, requirements).send({ from: account });
-      
-      alert('Order placed successfully!');
-      loadGigs();
+      showToast('Order placed successfully!', 'success');
+      setRequirements('');
+      setOrderingGig(null);
     } catch (error) {
-      console.error('Error placing order:', error);
-      alert('Failed to place order: ' + error.message);
-    } finally {
-      setLoading(false);
+      console.error('Order error:', error);
+      showToast('Failed to place order: ' + error.message, 'error');
+      setOrderingGig(null);
     }
   };
 
-  if (loading) {
-    return <div className="loading">Loading marketplace...</div>;
-  }
+  if (loading) return <Loading message="Loading marketplace..." />;
 
   return (
     <div className="marketplace">
-      <h2>Browse Gigs</h2>
+      <h1>AI Services Marketplace</h1>
       
       {gigs.length === 0 ? (
-        <p className="no-gigs">No gigs available yet. Be the first to create one!</p>
+        <div className="no-gigs">No active gigs available</div>
       ) : (
         <div className="gigs-grid">
           {gigs.map((gig) => (
@@ -74,18 +84,39 @@ const Marketplace = ({ marketplace, token, account }) => {
               <p className="gig-description">{gig.description}</p>
               <div className="gig-meta">
                 <span className="gig-model">🤖 {gig.aiModel}</span>
-                <span className="gig-delivery">⏱️ {gig.deliveryTimeHours}h</span>
+                <span className="gig-delivery">⏱️ {gig.deliveryTime}h</span>
               </div>
-              <div className="gig-stats">
-                <span>📦 {gig.ordersCompleted} orders</span>
-                <span>⭐ {gig.ratingCount > 0 ? (Number(gig.totalRating) / Number(gig.ratingCount)).toFixed(1) : 'N/A'}</span>
-              </div>
-              <div className="gig-footer">
-                <span className="gig-price">{fromWei(gig.priceInTokens)} DXIO</span>
-                <button onClick={() => placeOrder(gig.id, gig.priceInTokens)}>
+              <div className="gig-price">{fromWei(gig.price)} DXIO</div>
+              
+              {orderingGig === gig.id ? (
+                <div className="order-form">
+                  <textarea
+                    placeholder="Enter your requirements..."
+                    value={requirements}
+                    onChange={(e) => setRequirements(e.target.value)}
+                    rows="4"
+                  />
+                  <button 
+                    onClick={() => handlePlaceOrder(gig.id, gig.price)}
+                    className="order-btn"
+                  >
+                    Confirm Order
+                  </button>
+                  <button 
+                    onClick={() => setOrderingGig(null)}
+                    className="cancel-btn"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setOrderingGig(gig.id)}
+                  className="order-btn"
+                >
                   Order Now
                 </button>
-              </div>
+              )}
             </div>
           ))}
         </div>
