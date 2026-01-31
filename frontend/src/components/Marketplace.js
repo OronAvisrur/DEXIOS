@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useContracts } from '../hooks/useContracts';
 import { useWeb3 } from '../hooks/useWeb3';
 import { fromWei, toWei } from '../utils/web3';
+import { validateOrderRequirements, sanitizeInput } from '../utils/validation';
 import Loading from './Loading';
 import './Marketplace.css';
 
@@ -43,8 +44,9 @@ const Marketplace = ({ showToast }) => {
   };
 
   const handlePlaceOrder = async (gigId, price) => {
-    if (!requirements.trim()) {
-      showToast('Please enter requirements', 'error');
+    const validationError = validateOrderRequirements(requirements);
+    if (validationError) {
+      showToast(validationError, 'error');
       return;
     }
 
@@ -57,7 +59,8 @@ const Marketplace = ({ showToast }) => {
       }
 
       showToast('Placing order...', 'info');
-      await marketplace.methods.placeOrder(gigId, requirements).send({ from: account });
+      const sanitizedRequirements = sanitizeInput(requirements);
+      await marketplace.methods.placeOrder(gigId, sanitizedRequirements).send({ from: account });
       showToast('Order placed successfully!', 'success');
       setRequirements('');
       setOrderingGig(null);
@@ -91,19 +94,27 @@ const Marketplace = ({ showToast }) => {
               {orderingGig === gig.id ? (
                 <div className="order-form">
                   <textarea
-                    placeholder="Enter your requirements..."
+                    placeholder="Enter your requirements (minimum 10 characters)..."
                     value={requirements}
                     onChange={(e) => setRequirements(e.target.value)}
                     rows="4"
+                    maxLength="500"
                   />
+                  <div className="char-count">
+                    {requirements.length}/500
+                  </div>
                   <button 
                     onClick={() => handlePlaceOrder(gig.id, gig.price)}
                     className="order-btn"
+                    disabled={requirements.length < 10}
                   >
                     Confirm Order
                   </button>
                   <button 
-                    onClick={() => setOrderingGig(null)}
+                    onClick={() => {
+                      setOrderingGig(null);
+                      setRequirements('');
+                    }}
                     className="cancel-btn"
                   >
                     Cancel
