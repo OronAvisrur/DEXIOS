@@ -1,39 +1,43 @@
 import React, { useState, useEffect } from 'react';
+import { useContracts } from '../hooks/useContracts';
+import { useWeb3 } from '../hooks/useWeb3';
+import { fromWei } from '../utils/web3';
+import { uploadToIPFS } from '../utils/ipfs';
+import FileUpload from './FileUpload';
+import FilePreview from './FilePreview';
 import './MyOrders.css';
-import { fromWei, getOrderStatus } from '../utils/web3';
 
-const MyOrders = ({ marketplace, token, account }) => {
-  const [buyerOrders, setBuyerOrders] = useState([]);
-  const [sellerOrders, setSellerOrders] = useState([]);
+const MyOrders = () => {
+  const { account } = useWeb3();
+  const { marketplace } = useContracts();
+  const [activeTab, setActiveTab] = useState('buyer');
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState('buyer');
+  const [uploadingOrder, setUploadingOrder] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
-    loadOrders();
-  }, [marketplace, account]);
+    if (marketplace && account) {
+      loadOrders();
+    }
+  }, [marketplace, account, activeTab]);
 
   const loadOrders = async () => {
-    if (!marketplace || !account) return;
-
+    setLoading(true);
     try {
-      const buyerOrderIds = await marketplace.methods.getBuyerOrders(account).call();
-      const sellerOrderIds = await marketplace.methods.getSellerOrders(account).call();
+      const orderCount = await marketplace.methods.orderCounter().call();
+      const allOrders = [];
 
-      const loadedBuyerOrders = [];
-      const loadedSellerOrders = [];
-
-      for (let id of buyerOrderIds) {
-        const order = await marketplace.methods.getOrder(id).call();
-        loadedBuyerOrders.push(order);
+      for (let i = 1; i <= orderCount; i++) {
+        const order = await marketplace.methods.getOrder(i).call();
+        if (activeTab === 'buyer' && order.buyer.toLowerCase() === account.toLowerCase()) {
+          allOrders.push({ id: i, ...order });
+        } else if (activeTab === 'seller' && order.seller.toLowerCase() === account.toLowerCase()) {
+          allOrders.push({ id: i, ...order });
+        }
       }
 
-      for (let id of sellerOrderIds) {
-        const order = await marketplace.methods.getOrder(id).call();
-        loadedSellerOrders.push(order);
-      }
-
-      setBuyerOrders(loadedBuyerOrders);
-      setSellerOrders(loadedSellerOrders);
+      setOrders(allOrders);
     } catch (error) {
       console.error('Error loading orders:', error);
     } finally {
@@ -41,36 +45,50 @@ const MyOrders = ({ marketplace, token, account }) => {
     }
   };
 
-  const deliverWork = async (orderId) => {
-    const ipfsHash = prompt('Enter IPFS hash of delivered files:');
-    if (!ipfsHash) return;
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+  };
 
+  const handleDeliverWork = async (orderId) => {
+    if (!selectedFile) {
+      alert('Please select a file to upload');
+      return;
+    }
+
+    setUploadingOrder(orderId);
     try {
+      const ipfsHash = await uploadToIPFS(selectedFile);
       await marketplace.methods.deliverWork(orderId, ipfsHash).send({ from: account });
       alert('Work delivered successfully!');
+      setSelectedFile(null);
       loadOrders();
     } catch (error) {
-      console.error('Error delivering work:', error);
-      alert('Failed to deliver work');
+      console.error('Delivery error:', error);
+      alert('Failed to deliver work: ' + error.message);
+    } finally {
+      setUploadingOrder(null);
     }
   };
 
-  const approveOrder = async (orderId) => {
-    const rating = prompt('Rate this order (1-5 stars):');
-    if (!rating || rating < 1 || rating > 5) return;
+  const handleApproveOrder = async (orderId) => {
+    const rating = prompt('Rate the work (1-5 stars):');
+    if (!rating || rating < 1 || rating > 5) {
+      alert('Invalid rating');
+      return;
+    }
 
     try {
       await marketplace.methods.approveOrder(orderId, rating).send({ from: account });
-      alert('Order approved!');
+      alert('Order approved and payment released!');
       loadOrders();
     } catch (error) {
-      console.error('Error approving order:', error);
-      alert('Failed to approve order');
+      console.error('Approval error:', error);
+      alert('Failed to approve order: ' + error.message);
     }
   };
 
-  const rejectOrder = async (orderId) => {
-    const reason = prompt('Enter rejection reason:');
+  const handleRejectOrder = async (orderId) => {
+    const reason = prompt('Reason for rejection:');
     if (!reason) return;
 
     try {
@@ -78,65 +96,83 @@ const MyOrders = ({ marketplace, token, account }) => {
       alert('Order rejected. Dispute opened.');
       loadOrders();
     } catch (error) {
-      console.error('Error rejecting order:', error);
-      alert('Failed to reject order');
+      console.error('Rejection error:', error);
+      alert('Failed to reject order: ' + error.message);
     }
   };
 
-  if (loading) {
-    return <div className="loading">Loading orders...</div>;
-  }
+  const getStatusLabel = (status) => {
+    const statuses = ['Pending', 'Delivered', 'Approved', 'Rejected'];
+    return statuses[status] || 'Unknown';
+  };
 
-  const orders = view === 'buyer' ? buyerOrders : sellerOrders;
+  if (loading) return <div className="loading">Loading orders...</div>;
 
   return (
     <div className="my-orders">
-      <div className="orders-header">
-        <h2>My Orders</h2>
-        <div className="view-toggle">
-          <button 
-            className={view === 'buyer' ? 'active' : ''}
-            onClick={() => setView('buyer')}
-          >
-            As Buyer ({buyerOrders.length})
-          </button>
-          <button 
-            className={view === 'seller' ? 'active' : ''}
-            onClick={() => setView('seller')}
-          >
-            As Seller ({sellerOrders.length})
-          </button>
-        </div>
+      <h1>My Orders</h1>
+      
+      <div className="tabs">
+        <button 
+          className={activeTab === 'buyer' ? 'active' : ''} 
+          onClick={() => setActiveTab('buyer')}
+        >
+          As Buyer
+        </button>
+        <button 
+          className={activeTab === 'seller' ? 'active' : ''} 
+          onClick={() => setActiveTab('seller')}
+        >
+          As Seller
+        </button>
       </div>
 
       {orders.length === 0 ? (
-        <p className="no-orders">No orders yet.</p>
+        <div className="no-orders">No orders found</div>
       ) : (
         <div className="orders-list">
           {orders.map((order) => (
             <div key={order.id} className="order-card">
               <div className="order-header">
                 <h3>Order #{order.id}</h3>
-                <span className={`order-status status-${order.status}`}>
-                  {getOrderStatus(order.status)}
+                <span className={`status status-${order.status}`}>
+                  {getStatusLabel(order.status)}
                 </span>
               </div>
-              <p className="order-requirements">{order.requirements}</p>
+
               <div className="order-details">
-                <span>💰 {fromWei(order.paidAmount)} DXIO</span>
-                {order.ipfsHash && <span>📁 {order.ipfsHash.substring(0, 20)}...</span>}
+                <p><strong>Price:</strong> {fromWei(order.price)} DXIO</p>
+                <p><strong>Requirements:</strong> {order.requirements}</p>
+                {order.deliverable && (
+                  <p><strong>IPFS Hash:</strong> {order.deliverable.substring(0, 20)}...</p>
+                )}
               </div>
 
-              {view === 'seller' && order.status === '0' && (
-                <button onClick={() => deliverWork(order.id)}>Deliver Work</button>
+              {activeTab === 'seller' && order.status === '0' && (
+                <div className="delivery-section">
+                  <FileUpload onFileSelect={handleFileSelect} />
+                  {selectedFile && (
+                    <button 
+                      onClick={() => handleDeliverWork(order.id)}
+                      disabled={uploadingOrder === order.id}
+                      className="deliver-btn"
+                    >
+                      {uploadingOrder === order.id ? 'Uploading...' : 'Deliver Work'}
+                    </button>
+                  )}
+                </div>
               )}
 
-              {view === 'buyer' && order.status === '1' && (
-                <div className="order-actions">
-                  <button onClick={() => approveOrder(order.id)} className="approve">
-                    Approve
+              {order.status === '1' && order.deliverable && (
+                <FilePreview ipfsHash={order.deliverable} />
+              )}
+
+              {activeTab === 'buyer' && order.status === '1' && (
+                <div className="buyer-actions">
+                  <button onClick={() => handleApproveOrder(order.id)} className="approve-btn">
+                    Approve & Release Payment
                   </button>
-                  <button onClick={() => rejectOrder(order.id)} className="reject">
+                  <button onClick={() => handleRejectOrder(order.id)} className="reject-btn">
                     Reject
                   </button>
                 </div>
