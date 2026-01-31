@@ -1,0 +1,64 @@
+.file-preview {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.file-preview-loading {
+  text-align: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.preview-image {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.preview-pdf {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.preview-placeholder {
+  text-align: center;
+  padding: 40px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.preview-placeholder p {
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.preview-hash {
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.download-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+}
