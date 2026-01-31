@@ -1,94 +1,192 @@
 .my-orders {
-  color: white;
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.orders-header {
+.my-orders h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tabs {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
-.orders-header h2 {
-  font-size: 36px;
+.tabs button {
+  padding: 12px 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.view-toggle {
-  display: flex;
-  gap: 10px;
-}
-
-.view-toggle button {
-  background: rgba(255, 255, 255, 0.2);
+.tabs button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border-color: transparent;
 }
 
-.view-toggle button.active {
-  background: white;
-  color: #667eea;
+.tabs button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.no-orders {
+  text-align: center;
+  padding: 80px 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 18px;
 }
 
 .orders-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
 }
 
 .order-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  padding: 25px;
-  color: #333;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 30px;
 }
 
 .order-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .order-header h3 {
-  font-size: 20px;
-  color: #667eea;
+  font-size: 24px;
+  color: white;
 }
 
-.order-status {
-  padding: 6px 16px;
-  border-radius: 20px;
+.status {
+  padding: 8px 16px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
 }
 
-.status-0 { background: #fff3cd; color: #856404; }
-.status-1 { background: #d1ecf1; color: #0c5460; }
-.status-2 { background: #d4edda; color: #155724; }
-.status-3 { background: #f8d7da; color: #721c24; }
-.status-4 { background: #e2e3e5; color: #383d41; }
+.status-0 {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
 
-.order-requirements {
-  color: #666;
-  margin-bottom: 15px;
+.status-1 {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.status-2 {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.status-3 {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
 }
 
 .order-details {
-  display: flex;
-  gap: 20px;
-  color: #666;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
-.order-actions {
-  display: flex;
-  gap: 10px;
+.order-details p {
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
 }
 
-.approve {
-  background: #28a745;
+.order-details strong {
   color: white;
 }
 
-.reject {
-  background: #dc3545;
+.delivery-section {
+  margin-top: 20px;
+}
+
+.file-info {
+  margin: 15px 0;
+  padding: 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+}
+
+.file-info p {
+  margin: 5px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.deliver-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.deliver-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deliver-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.buyer-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.approve-btn,
+.reject-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.approve-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.reject-btn {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.approve-btn:hover,
+.reject-btn:hover {
+  transform: translateY(-2px);
 }

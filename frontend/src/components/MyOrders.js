@@ -3,6 +3,7 @@ import { useContracts } from '../hooks/useContracts';
 import { useWeb3 } from '../hooks/useWeb3';
 import { fromWei } from '../utils/web3';
 import { uploadToIPFS } from '../utils/ipfs';
+import { validateFile, validateRating } from '../utils/validation';
 import FileUpload from './FileUpload';
 import FilePreview from './FilePreview';
 import Loading from './Loading';
@@ -49,6 +50,11 @@ const MyOrders = ({ showToast }) => {
   };
 
   const handleFileSelect = (file) => {
+    const validationError = validateFile(file);
+    if (validationError) {
+      showToast(validationError, 'error');
+      return;
+    }
     setSelectedFile(file);
     showToast('File selected: ' + file.name, 'info');
   };
@@ -56,6 +62,12 @@ const MyOrders = ({ showToast }) => {
   const handleDeliverWork = async (orderId) => {
     if (!selectedFile) {
       showToast('Please select a file to upload', 'error');
+      return;
+    }
+
+    const validationError = validateFile(selectedFile);
+    if (validationError) {
+      showToast(validationError, 'error');
       return;
     }
 
@@ -80,8 +92,10 @@ const MyOrders = ({ showToast }) => {
 
   const handleApproveOrder = async (orderId) => {
     const rating = prompt('Rate the work (1-5 stars):');
-    if (!rating || rating < 1 || rating > 5) {
-      showToast('Invalid rating', 'error');
+    
+    const validationError = validateRating(rating);
+    if (validationError) {
+      showToast(validationError, 'error');
       return;
     }
 
@@ -97,15 +111,15 @@ const MyOrders = ({ showToast }) => {
   };
 
   const handleRejectOrder = async (orderId) => {
-    const reason = prompt('Reason for rejection:');
-    if (!reason) {
-      showToast('Rejection cancelled', 'info');
+    const reason = prompt('Reason for rejection (minimum 10 characters):');
+    if (!reason || reason.trim().length < 10) {
+      showToast('Rejection reason must be at least 10 characters', 'error');
       return;
     }
 
     try {
       showToast('Rejecting order...', 'info');
-      await marketplace.methods.rejectOrder(orderId, reason).send({ from: account });
+      await marketplace.methods.rejectOrder(orderId, reason.trim()).send({ from: account });
       showToast('Order rejected. Dispute opened.', 'success');
       loadOrders();
     } catch (error) {
@@ -164,6 +178,12 @@ const MyOrders = ({ showToast }) => {
               {activeTab === 'seller' && order.status === '0' && (
                 <div className="delivery-section">
                   <FileUpload onFileSelect={handleFileSelect} />
+                  {selectedFile && (
+                    <div className="file-info">
+                      <p>Selected: {selectedFile.name}</p>
+                      <p>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  )}
                   {selectedFile && (
                     <button 
                       onClick={() => handleDeliverWork(order.id)}
