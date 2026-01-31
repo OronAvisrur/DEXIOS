@@ -6,6 +6,8 @@ import Marketplace from './components/Marketplace';
 import CreateGig from './components/CreateGig';
 import MyGigs from './components/MyGigs';
 import MyOrders from './components/MyOrders';
+import Analytics from './components/Analytics';
+import BuyerDashboard from './components/BuyerDashboard';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
 import './App.css';
@@ -24,6 +26,8 @@ function App() {
             <Route path="/create-gig" element={<CreateGig showToast={showToast} />} />
             <Route path="/my-gigs" element={<MyGigs showToast={showToast} />} />
             <Route path="/my-orders" element={<MyOrders showToast={showToast} />} />
+            <Route path="/analytics" element={<Analytics showToast={showToast} />} />
+            <Route path="/dashboard" element={<BuyerDashboard showToast={showToast} />} />
           </Routes>
         </div>
         <ToastContainer toasts={toasts} removeToast={removeToast} />
