@@ -5,9 +5,10 @@ import { fromWei } from '../utils/web3';
 import { uploadToIPFS } from '../utils/ipfs';
 import FileUpload from './FileUpload';
 import FilePreview from './FilePreview';
+import Loading from './Loading';
 import './MyOrders.css';
 
-const MyOrders = () => {
+const MyOrders = ({ showToast }) => {
   const { account } = useWeb3();
   const { marketplace } = useContracts();
   const [activeTab, setActiveTab] = useState('buyer');
@@ -38,8 +39,10 @@ const MyOrders = () => {
       }
 
       setOrders(allOrders);
+      showToast('Orders loaded successfully', 'success');
     } catch (error) {
       console.error('Error loading orders:', error);
+      showToast('Failed to load orders', 'error');
     } finally {
       setLoading(false);
     }
@@ -47,24 +50,29 @@ const MyOrders = () => {
 
   const handleFileSelect = (file) => {
     setSelectedFile(file);
+    showToast('File selected: ' + file.name, 'info');
   };
 
   const handleDeliverWork = async (orderId) => {
     if (!selectedFile) {
-      alert('Please select a file to upload');
+      showToast('Please select a file to upload', 'error');
       return;
     }
 
     setUploadingOrder(orderId);
     try {
+      showToast('Uploading to IPFS...', 'info');
       const ipfsHash = await uploadToIPFS(selectedFile);
+      
+      showToast('Submitting delivery...', 'info');
       await marketplace.methods.deliverWork(orderId, ipfsHash).send({ from: account });
-      alert('Work delivered successfully!');
+      
+      showToast('Work delivered successfully!', 'success');
       setSelectedFile(null);
       loadOrders();
     } catch (error) {
       console.error('Delivery error:', error);
-      alert('Failed to deliver work: ' + error.message);
+      showToast('Failed to deliver work: ' + error.message, 'error');
     } finally {
       setUploadingOrder(null);
     }
@@ -73,31 +81,36 @@ const MyOrders = () => {
   const handleApproveOrder = async (orderId) => {
     const rating = prompt('Rate the work (1-5 stars):');
     if (!rating || rating < 1 || rating > 5) {
-      alert('Invalid rating');
+      showToast('Invalid rating', 'error');
       return;
     }
 
     try {
+      showToast('Approving order...', 'info');
       await marketplace.methods.approveOrder(orderId, rating).send({ from: account });
-      alert('Order approved and payment released!');
+      showToast('Order approved and payment released!', 'success');
       loadOrders();
     } catch (error) {
       console.error('Approval error:', error);
-      alert('Failed to approve order: ' + error.message);
+      showToast('Failed to approve order: ' + error.message, 'error');
     }
   };
 
   const handleRejectOrder = async (orderId) => {
     const reason = prompt('Reason for rejection:');
-    if (!reason) return;
+    if (!reason) {
+      showToast('Rejection cancelled', 'info');
+      return;
+    }
 
     try {
+      showToast('Rejecting order...', 'info');
       await marketplace.methods.rejectOrder(orderId, reason).send({ from: account });
-      alert('Order rejected. Dispute opened.');
+      showToast('Order rejected. Dispute opened.', 'success');
       loadOrders();
     } catch (error) {
       console.error('Rejection error:', error);
-      alert('Failed to reject order: ' + error.message);
+      showToast('Failed to reject order: ' + error.message, 'error');
     }
   };
 
@@ -106,7 +119,7 @@ const MyOrders = () => {
     return statuses[status] || 'Unknown';
   };
 
-  if (loading) return <div className="loading">Loading orders...</div>;
+  if (loading) return <Loading message="Loading orders..." />;
 
   return (
     <div className="my-orders">
