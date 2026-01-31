@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useContracts } from '../hooks/useContracts';
 import { useWeb3 } from '../hooks/useWeb3';
 import { toWei } from '../utils/web3';
+import { validateGigForm, sanitizeInput } from '../utils/validation';
 import Loading from './Loading';
 import './CreateGig.css';
 
@@ -16,19 +17,23 @@ const CreateGig = ({ showToast }) => {
     price: '',
     deliveryTime: ''
   });
+  const [errors, setErrors] = useState([]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: sanitizeInput(e.target.value)
     });
+    setErrors([]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.description || !formData.aiModel || !formData.price || !formData.deliveryTime) {
-      showToast('Please fill all fields', 'error');
+    const validationErrors = validateGigForm(formData);
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      validationErrors.forEach(error => showToast(error, 'error'));
       return;
     }
 
@@ -61,6 +66,7 @@ const CreateGig = ({ showToast }) => {
         price: '',
         deliveryTime: ''
       });
+      setErrors([]);
     } catch (error) {
       console.error('Create gig error:', error);
       showToast('Failed to create gig: ' + error.message, 'error');
@@ -83,6 +89,7 @@ const CreateGig = ({ showToast }) => {
             value={formData.title}
             onChange={handleChange}
             placeholder="e.g., AI Logo Design with DALL-E 3"
+            maxLength="100"
           />
         </div>
 
@@ -94,6 +101,7 @@ const CreateGig = ({ showToast }) => {
             onChange={handleChange}
             placeholder="Describe your service..."
             rows="5"
+            maxLength="500"
           />
         </div>
 
@@ -105,6 +113,7 @@ const CreateGig = ({ showToast }) => {
             value={formData.aiModel}
             onChange={handleChange}
             placeholder="e.g., GPT-4, DALL-E 3, Midjourney"
+            maxLength="50"
           />
         </div>
 
@@ -117,7 +126,7 @@ const CreateGig = ({ showToast }) => {
               value={formData.price}
               onChange={handleChange}
               placeholder="50"
-              min="1"
+              min="0.01"
               step="0.01"
             />
           </div>
@@ -134,6 +143,14 @@ const CreateGig = ({ showToast }) => {
             />
           </div>
         </div>
+
+        {errors.length > 0 && (
+          <div className="error-messages">
+            {errors.map((error, index) => (
+              <p key={index} className="error-text">{error}</p>
+            ))}
+          </div>
+        )}
 
         <button type="submit" className="submit-btn">
           Create Gig
