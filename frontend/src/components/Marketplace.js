@@ -3,16 +3,27 @@ import { useContracts } from '../hooks/useContracts';
 import { useWeb3 } from '../hooks/useWeb3';
 import { fromWei, toWei } from '../utils/web3';
 import { validateOrderRequirements, sanitizeInput } from '../utils/validation';
+import SearchBar from './SearchBar';
+import Filters from './Filters';
 import Loading from './Loading';
 import './Marketplace.css';
 
 const Marketplace = ({ showToast }) => {
   const { account } = useWeb3();
   const { marketplace, token } = useContracts();
-  const [gigs, setGigs] = useState([]);
+  const [allGigs, setAllGigs] = useState([]);
+  const [filteredGigs, setFilteredGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [orderingGig, setOrderingGig] = useState(null);
   const [requirements, setRequirements] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [filters, setFilters] = useState({
+    minPrice: '',
+    maxPrice: '',
+    maxDeliveryTime: '',
+    aiModel: ''
+  });
 
   useEffect(() => {
     if (marketplace) {
@@ -20,20 +31,24 @@ const Marketplace = ({ showToast }) => {
     }
   }, [marketplace]);
 
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [allGigs, searchTerm, filters, sortBy]);
+
   const loadGigs = async () => {
     setLoading(true);
     try {
       const gigCount = await marketplace.methods.gigCounter().call();
-      const allGigs = [];
+      const gigs = [];
 
       for (let i = 1; i <= gigCount; i++) {
         const gig = await marketplace.methods.getGig(i).call();
         if (gig.isActive) {
-          allGigs.push({ id: i, ...gig });
+          gigs.push({ id: i, ...gig });
         }
       }
 
-      setGigs(allGigs);
+      setAllGigs(gigs);
       showToast('Gigs loaded successfully', 'success');
     } catch (error) {
       console.error('Error loading gigs:', error);
@@ -41,6 +56,54 @@ const Marketplace = ({ showToast }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFiltersAndSort = () => {
+    let result = [...allGigs];
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(gig =>
+        gig.title.toLowerCase().includes(term) ||
+        gig.description.toLowerCase().includes(term) ||
+        gig.aiModel.toLowerCase().includes(term)
+      );
+    }
+
+    if (filters.minPrice) {
+      const minPriceWei = toWei(filters.minPrice);
+      result = result.filter(gig => BigInt(gig.price) >= BigInt(minPriceWei));
+    }
+
+    if (filters.maxPrice) {
+      const maxPriceWei = toWei(filters.maxPrice);
+      result = result.filter(gig => BigInt(gig.price) <= BigInt(maxPriceWei));
+    }
+
+    if (filters.maxDeliveryTime) {
+      result = result.filter(gig => parseInt(gig.deliveryTime) <= parseInt(filters.maxDeliveryTime));
+    }
+
+    if (filters.aiModel) {
+      const model = filters.aiModel.toLowerCase();
+      result = result.filter(gig => gig.aiModel.toLowerCase().includes(model));
+    }
+
+    if (sortBy === 'newest') {
+      result.reverse();
+    } else if (sortBy === 'cheapest') {
+      result.sort((a, b) => BigInt(a.price) > BigInt(b.price) ? 1 : -1);
+    } else if (sortBy === 'expensive') {
+      result.sort((a, b) => BigInt(a.price) < BigInt(b.price) ? 1 : -1);
+    } else if (sortBy === 'fastest') {
+      result.sort((a, b) => parseInt(a.deliveryTime) - parseInt(b.deliveryTime));
+    }
+
+    setFilteredGigs(result);
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const handlePlaceOrder = async (gigId, price) => {
@@ -77,11 +140,24 @@ const Marketplace = ({ showToast }) => {
     <div className="marketplace">
       <h1>AI Services Marketplace</h1>
       
-      {gigs.length === 0 ? (
-        <div className="no-gigs">No active gigs available</div>
+      <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+      
+      <Filters 
+        filters={filters} 
+        onFilterChange={handleFilterChange}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
+
+      {filteredGigs.length === 0 ? (
+        <div className="no-gigs">
+          {searchTerm || Object.values(filters).some(v => v) 
+            ? 'No gigs match your filters' 
+            : 'No active gigs available'}
+        </div>
       ) : (
         <div className="gigs-grid">
-          {gigs.map((gig) => (
+          {filteredGigs.map((gig) => (
             <div key={gig.id} className="gig-card">
               <h3>{gig.title}</h3>
               <p className="gig-description">{gig.description}</p>
