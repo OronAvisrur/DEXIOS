@@ -10,8 +10,8 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
     IERC20 public dexiosToken;
     SellerProfileNFT public sellerProfileNFT;
 
-    uint256 private _gigIdCounter;
-    uint256 private _orderIdCounter;
+    uint256 public gigCounter;
+    uint256 public orderCounter;
     uint256 public platformFeePercent = 250;
 
     enum OrderStatus {
@@ -65,28 +65,32 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
     event OrderRejected(uint256 indexed orderId, string reason);
     event OrderDisputed(uint256 indexed orderId);
 
+    error NoSellerProfile();
+    error InvalidInput();
+    error Unauthorized();
+    error InvalidStatus();
+
     constructor(address _tokenAddress, address _nftAddress) Ownable(msg.sender) {
         dexiosToken = IERC20(_tokenAddress);
         sellerProfileNFT = SellerProfileNFT(_nftAddress);
     }
 
     function createGig(
-        string memory title,
-        string memory description,
-        string memory aiModel,
+        string calldata title,
+        string calldata description,
+        string calldata aiModel,
         uint256 priceInTokens,
         uint256 deliveryTimeHours
     ) external returns (uint256) {
-        require(sellerProfileNFT.hasProfile(msg.sender), "Must have seller profile");
-        require(bytes(title).length > 0, "Title required");
-        require(priceInTokens > 0, "Price must be greater than 0");
-        require(deliveryTimeHours > 0, "Delivery time must be greater than 0");
+        if (!sellerProfileNFT.hasProfile(msg.sender)) revert NoSellerProfile();
+        if (bytes(title).length == 0 || priceInTokens == 0 || deliveryTimeHours == 0) revert InvalidInput();
 
-        _gigIdCounter++;
-        uint256 newGigId = _gigIdCounter;
+        unchecked {
+            ++gigCounter;
+        }
 
-        gigs[newGigId] = Gig({
-            id: newGigId,
+        gigs[gigCounter] = Gig({
+            id: gigCounter,
             seller: msg.sender,
             title: title,
             description: description,
@@ -100,32 +104,33 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
             createdAt: block.timestamp
         });
 
-        sellerGigs[msg.sender].push(newGigId);
+        sellerGigs[msg.sender].push(gigCounter);
 
-        emit GigCreated(newGigId, msg.sender, title, priceInTokens);
-        return newGigId;
+        emit GigCreated(gigCounter, msg.sender, title, priceInTokens);
+        return gigCounter;
     }
 
     function updateGigStatus(uint256 gigId, bool isActive) external {
-        require(gigs[gigId].seller == msg.sender, "Not gig owner");
+        if (gigs[gigId].seller != msg.sender) revert Unauthorized();
         gigs[gigId].isActive = isActive;
         emit GigUpdated(gigId, isActive);
     }
 
-    function placeOrder(uint256 gigId, string memory requirements) external nonReentrant returns (uint256) {
+    function placeOrder(uint256 gigId, string calldata requirements) external nonReentrant returns (uint256) {
         Gig storage gig = gigs[gigId];
-        require(gig.isActive, "Gig not active");
-        require(msg.sender != gig.seller, "Cannot order own gig");
-        require(bytes(requirements).length > 0, "Requirements needed");
+        if (!gig.isActive) revert InvalidStatus();
+        if (msg.sender == gig.seller) revert Unauthorized();
+        if (bytes(requirements).length == 0) revert InvalidInput();
 
         uint256 totalAmount = gig.priceInTokens;
         require(dexiosToken.transferFrom(msg.sender, address(this), totalAmount), "Payment failed");
 
-        _orderIdCounter++;
-        uint256 newOrderId = _orderIdCounter;
+        unchecked {
+            ++orderCounter;
+        }
 
-        orders[newOrderId] = Order({
-            id: newOrderId,
+        orders[orderCounter] = Order({
+            id: orderCounter,
             gigId: gigId,
             buyer: msg.sender,
             seller: gig.seller,
@@ -138,18 +143,18 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
             deliveredAt: 0
         });
 
-        buyerOrders[msg.sender].push(newOrderId);
-        sellerOrders[gig.seller].push(newOrderId);
+        buyerOrders[msg.sender].push(orderCounter);
+        sellerOrders[gig.seller].push(orderCounter);
 
-        emit OrderPlaced(newOrderId, gigId, msg.sender, totalAmount);
-        return newOrderId;
+        emit OrderPlaced(orderCounter, gigId, msg.sender, totalAmount);
+        return orderCounter;
     }
 
-    function deliverWork(uint256 orderId, string memory ipfsHash) external {
+    function deliverWork(uint256 orderId, string calldata ipfsHash) external {
         Order storage order = orders[orderId];
-        require(order.seller == msg.sender, "Not order seller");
-        require(order.status == OrderStatus.Pending, "Invalid order status");
-        require(bytes(ipfsHash).length > 0, "IPFS hash required");
+        if (order.seller != msg.sender) revert Unauthorized();
+        if (order.status != OrderStatus.Pending) revert InvalidStatus();
+        if (bytes(ipfsHash).length == 0) revert InvalidInput();
 
         order.ipfsHash = ipfsHash;
         order.status = OrderStatus.Delivered;
@@ -160,9 +165,9 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
 
     function approveOrder(uint256 orderId, uint256 rating) external nonReentrant {
         Order storage order = orders[orderId];
-        require(order.buyer == msg.sender, "Not order buyer");
-        require(order.status == OrderStatus.Delivered, "Order not delivered");
-        require(rating >= 1 && rating <= 5, "Rating must be 1-5");
+        if (order.buyer != msg.sender) revert Unauthorized();
+        if (order.status != OrderStatus.Delivered) revert InvalidStatus();
+        if (rating < 1 || rating > 5) revert InvalidInput();
 
         order.status = OrderStatus.Approved;
         order.rating = rating;
@@ -174,9 +179,11 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
         require(dexiosToken.transfer(owner(), platformFee), "Fee transfer failed");
 
         Gig storage gig = gigs[order.gigId];
-        gig.ordersCompleted++;
-        gig.totalRating += rating;
-        gig.ratingCount++;
+        unchecked {
+            ++gig.ordersCompleted;
+            gig.totalRating += rating;
+            ++gig.ratingCount;
+        }
 
         uint256 sellerTokenId = sellerProfileNFT.sellerToTokenId(order.seller);
         sellerProfileNFT.updateReputation(sellerTokenId, rating, true, sellerAmount);
@@ -184,11 +191,11 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
         emit OrderApproved(orderId, rating);
     }
 
-    function rejectOrder(uint256 orderId, string memory reason) external {
+    function rejectOrder(uint256 orderId, string calldata reason) external {
         Order storage order = orders[orderId];
-        require(order.buyer == msg.sender, "Not order buyer");
-        require(order.status == OrderStatus.Delivered, "Order not delivered");
-        require(bytes(reason).length > 0, "Reason required");
+        if (order.buyer != msg.sender) revert Unauthorized();
+        if (order.status != OrderStatus.Delivered) revert InvalidStatus();
+        if (bytes(reason).length == 0) revert InvalidInput();
 
         order.status = OrderStatus.Rejected;
 
@@ -198,7 +205,7 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
 
     function resolveDispute(uint256 orderId, bool approveOrder) external onlyOwner nonReentrant {
         Order storage order = orders[orderId];
-        require(order.status == OrderStatus.Rejected || order.status == OrderStatus.Disputed, "Not disputed");
+        if (order.status != OrderStatus.Rejected && order.status != OrderStatus.Disputed) revert InvalidStatus();
 
         if (approveOrder) {
             order.status = OrderStatus.Approved;
@@ -210,7 +217,9 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
             require(dexiosToken.transfer(owner(), platformFee), "Fee transfer failed");
 
             Gig storage gig = gigs[order.gigId];
-            gig.ordersCompleted++;
+            unchecked {
+                ++gig.ordersCompleted;
+            }
 
             uint256 sellerTokenId = sellerProfileNFT.sellerToTokenId(order.seller);
             sellerProfileNFT.updateReputation(sellerTokenId, 0, true, sellerAmount);
@@ -241,12 +250,11 @@ contract DexiosMarketplace is Ownable, ReentrancyGuard {
 
     function getGigAverageRating(uint256 gigId) external view returns (uint256) {
         Gig memory gig = gigs[gigId];
-        if (gig.ratingCount == 0) return 0;
-        return gig.totalRating / gig.ratingCount;
+        return gig.ratingCount == 0 ? 0 : gig.totalRating / gig.ratingCount;
     }
 
     function setPlatformFee(uint256 newFeePercent) external onlyOwner {
-        require(newFeePercent <= 1000, "Fee too high");
+        if (newFeePercent > 1000) revert InvalidInput();
         platformFeePercent = newFeePercent;
     }
 }
