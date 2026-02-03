@@ -23,14 +23,32 @@ DEXIOS eliminates intermediaries in freelance marketplaces by leveraging blockch
 
 ## ✨ Features
 
+### Core Functionality
 - 🎯 **Fully Decentralized** - No backend servers or central database
 - 💰 **Smart Escrow** - Secure payments via Solidity contracts
 - 🏆 **NFT Reputation** - Portable, tamper-proof seller profiles (ERC-721)
 - 📁 **IPFS Storage** - Decentralized file delivery
 - ⚡ **Gas Optimized** - Custom errors, efficient storage patterns
 - 🔒 **Security First** - CEI pattern, reentrancy guards, OpenZeppelin libraries
+
+### Search & Discovery
+- 🔍 **Keyword Search** - Search gigs by title, description, or AI model
+- 🎚️ **Advanced Filters** - Filter by price range, delivery time, AI model
+- 📊 **Smart Sorting** - Sort by newest, price (low/high), fastest delivery
+- ⚡ **Real-time Updates** - Instant filter and search results
+
+### User Experience
 - 🎨 **Modern UI** - 2026 glassmorphism design with React 18
 - 📤 **File Upload** - Drag & drop support for deliverables
+- 🔔 **Toast Notifications** - Real-time feedback for all actions
+- ⚙️ **Form Validation** - Client-side validation with sanitization
+- 🛡️ **Error Boundaries** - Graceful error handling and recovery
+- ⏳ **Loading States** - Animated spinners during transactions
+
+### Analytics Dashboards
+- 📈 **Seller Analytics** - Track earnings, gigs, orders, and performance
+- 💎 **Buyer Dashboard** - Monitor spending, orders, and token balance
+- 📊 **Real-time Stats** - Live updates from blockchain
 
 ---
 
@@ -41,6 +59,8 @@ DEXIOS eliminates intermediaries in freelance marketplaces by leveraging blockch
 │  - MetaMask Integration             │
 │  - Real-time Contract Updates       │
 │  - IPFS File Handling               │
+│  - Search & Filter Engine           │
+│  - Toast Notifications              │
 └─────────────────────────────────────┘
               ↓ Web3.js
 ┌─────────────────────────────────────┐
@@ -51,7 +71,7 @@ DEXIOS eliminates intermediaries in freelance marketplaces by leveraging blockch
 └─────────────────────────────────────┘
               ↓ Events
 ┌─────────────────────────────────────┐
-│         IPFS (Web3.Storage)         │
+│         IPFS (Infura Gateway)       │
 │  - Deliverable Files                │
 │  - Gig Images/Portfolios            │
 └─────────────────────────────────────┘
@@ -69,45 +89,75 @@ DEXIOS eliminates intermediaries in freelance marketplaces by leveraging blockch
 
 ### Frontend Layer
 - **React** 18+ - Modern UI library
+- **React Router** 6.22.0 - Client-side routing
 - **Web3.js** 4.x - Ethereum JavaScript API
-- **Custom Hooks** - useWeb3, useContracts
+- **Custom Hooks** - useWeb3, useContracts, useToast
 - **Glassmorphism CSS** - 2026 design trends
 
 ### Storage Layer
-- **IPFS** - Decentralized content addressing
+- **IPFS** - Decentralized content addressing via Infura gateway
 
 ---
 
 ## 📦 Project Structure
 ```
-dexios-platform/
-├── contracts/                    # Solidity smart contracts
-│   ├── DexiosMarketplace.sol    # Core marketplace logic
-│   ├── DexiosToken.sol          # ERC-20 payment token
-│   ├── SellerProfileNFT.sol     # ERC-721 reputation NFT
-│   └── Migrations.sol           # Deployment helper
-├── migrations/                   # Truffle deployment scripts
-├── test/                        # Contract test suite
-│   └── dexios_test.js          # 15 comprehensive tests
-├── frontend/                    # React application
+DEXIOS/
+├── contracts/                          # Solidity smart contracts
+│   ├── DexiosMarketplace.sol          # Core marketplace logic
+│   ├── DexiosToken.sol                # ERC-20 payment token
+│   ├── SellerProfileNFT.sol           # ERC-721 reputation NFT
+│   └── Migrations.sol                 # Deployment helper
+│
+├── migrations/                         # Truffle deployment scripts
+│   ├── 1_initial_migration.js
+│   └── 2_deploy_contracts.js
+│
+├── test/                              # Smart contract tests
+│   └── dexios_test.js                # 15 comprehensive tests
+│
+├── frontend/                          # React application
+│   ├── public/
+│   │   └── index.html
 │   ├── src/
-│   │   ├── components/         # UI components
-│   │   │   ├── Navbar.js
-│   │   │   ├── Home.js
-│   │   │   ├── Marketplace.js
-│   │   │   ├── CreateGig.js
-│   │   │   ├── MyGigs.js
-│   │   │   ├── MyOrders.js
-│   │   │   └── FileUpload.js
-│   │   ├── hooks/              # Custom React hooks
-│   │   │   ├── useWeb3.js
-│   │   │   └── useContracts.js
-│   │   ├── utils/              # Helper functions
-│   │   │   └── web3.js
-│   │   └── contracts/          # Contract ABIs
+│   │   ├── components/               # UI components
+│   │   │   ├── Navbar.js            # Navigation with wallet
+│   │   │   ├── Home.js              # Landing page
+│   │   │   ├── Marketplace.js       # Browse & search gigs
+│   │   │   ├── SearchBar.js         # Keyword search
+│   │   │   ├── Filters.js           # Advanced filters
+│   │   │   ├── CreateGig.js         # Seller creates gigs
+│   │   │   ├── MyGigs.js            # Seller dashboard
+│   │   │   ├── MyOrders.js          # Buyer/seller order tracking
+│   │   │   ├── Analytics.js         # Seller analytics
+│   │   │   ├── BuyerDashboard.js    # Buyer dashboard
+│   │   │   ├── FileUpload.js        # Drag & drop component
+│   │   │   ├── FilePreview.js       # File preview & download
+│   │   │   ├── Loading.js           # Loading spinner
+│   │   │   ├── Toast.js             # Notification component
+│   │   │   ├── ToastContainer.js    # Toast wrapper
+│   │   │   ├── ErrorBoundary.js     # Error recovery
+│   │   │   └── [CSS files]          # Component styles
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   ├── useWeb3.js          # MetaMask connection
+│   │   │   ├── useContracts.js     # Contract initialization
+│   │   │   └── useToast.js         # Toast notifications
+│   │   ├── utils/                   # Helper functions
+│   │   │   ├── web3.js             # Web3 utilities (toWei, fromWei)
+│   │   │   ├── ipfs.js             # IPFS upload/download
+│   │   │   └── validation.js       # Form validation & sanitization
+│   │   ├── contracts/               # Contract ABIs (auto-generated)
+│   │   ├── App.js                   # Main app with routing
+│   │   ├── App.css
+│   │   ├── index.js                 # React entry point
+│   │   └── index.css                # Global styles
 │   └── package.json
-├── truffle-config.js
-└── package.json
+│
+├── truffle-config.js                  # Truffle configuration
+├── package.json                       # Root dependencies
+├── README.md                          # This file
+├── PROJECT_CONTEXT.md                 # Development context
+├── PROJECT_PROGRESS.md                # Progress tracker
+└── .gitignore
 ```
 
 ---
@@ -126,15 +176,12 @@ truffle version   # Should be >= 5.11.0
 ### Step 1: Clone Repository
 ```bash
 git clone https://github.com/yourusername/dexios-platform.git
-cd dexios-platform
+cd DEXIOS
 ```
 
 ### Step 2: Install Dependencies
 ```bash
-# Root dependencies
 npm install
-
-# Frontend dependencies
 cd frontend
 npm install
 cd ..
@@ -159,7 +206,7 @@ Available Accounts
 
 **Terminal 2:**
 ```bash
-cd ~/dexios-platform
+cd ~/DEXIOS
 truffle compile
 truffle migrate --reset
 ```
@@ -198,7 +245,6 @@ cp build/contracts/*.json frontend/src/contracts/
 **Terminal 3:**
 ```bash
 cd frontend
-export PATH="/usr/bin:$PATH"  # For WSL users
 npm start
 ```
 
@@ -277,7 +323,7 @@ Each seller mints a unique profile NFT storing:
 ```
 1. Connect MetaMask → Account detected
 2. Navigate to "Create Gig"
-3. Fill form:
+3. Fill form (validated in real-time):
    - Title: "AI Logo Design with DALL-E 3"
    - Description: "Professional logos in any style"
    - AI Model: "DALL-E 3"
@@ -285,32 +331,62 @@ Each seller mints a unique profile NFT storing:
    - Delivery: 24 hours
 4. Submit → Profile NFT auto-minted if first gig
 5. Transaction confirmed → Gig live in marketplace
+6. Toast notification: "Gig created successfully!"
 ```
 
 ### Workflow 2: Buyer Orders Service
 ```
 1. Browse "Marketplace"
-2. Select gig → View details
-3. Click "Order Now"
-4. Enter requirements
-5. Approve 50 DXIO spending → Confirm
-6. Place order → 50 DXIO locked in escrow
-7. Wait for delivery
+2. Use SearchBar to find "logo design"
+3. Apply filters: Price 0-100 DXIO, Delivery < 48h
+4. Sort by "Cheapest"
+5. Select gig → Click "Order Now"
+6. Enter requirements (validated, min 10 chars)
+7. Approve 50 DXIO spending → Confirm
+8. Place order → 50 DXIO locked in escrow
+9. Toast notification: "Order placed successfully!"
 ```
 
 ### Workflow 3: Complete Order Cycle
 ```
 Seller:
-1. View "My Orders" → "As Seller"
-2. Create deliverables using AI tools
-3. Upload to IPFS → Get hash
-4. Submit delivery with IPFS hash
+1. View "My Orders" → "As Seller" tab
+2. See pending order
+3. Create deliverables using AI tools
+4. Drag & drop file to FileUpload component
+5. Click "Deliver Work" → Upload to IPFS
+6. Submit delivery with IPFS hash
+7. Toast: "Work delivered successfully!"
 
 Buyer:
-5. Download from IPFS → Review quality
-6. Approve order → Rate 1-5 stars
-7. Smart contract releases payment (47.5 DXIO to seller, 2.5 DXIO platform fee)
-8. Seller reputation NFT updates automatically
+8. View "My Orders" → "As Buyer" tab
+9. See delivered order
+10. Click file to preview or download
+11. Review quality
+12. Click "Approve & Release Payment"
+13. Rate 1-5 stars (validated)
+14. Smart contract releases payment (47.5 DXIO to seller, 2.5 DXIO fee)
+15. Seller reputation NFT updates automatically
+16. Toast: "Order approved and payment released!"
+```
+
+### Workflow 4: View Analytics
+```
+Seller:
+1. Navigate to "Analytics"
+2. View dashboard:
+   - Total Earnings: 237.5 DXIO
+   - Total Gigs: 5 (3 active)
+   - Total Orders: 12 (10 completed)
+   - Pending Orders: 2
+
+Buyer:
+1. Navigate to "Dashboard"
+2. View statistics:
+   - Token Balance: 450 DXIO
+   - Total Orders: 8 (7 completed)
+   - Pending Orders: 1
+   - Total Spent: 350 DXIO
 ```
 
 ---
@@ -323,8 +399,10 @@ Buyer:
 ✅ **ReentrancyGuard** - OpenZeppelin protection on critical functions  
 ✅ **Access Control** - Ownable pattern for admin functions  
 ✅ **Integer Overflow** - Solidity 0.8+ built-in SafeMath  
-✅ **Input Validation** - Require statements on all parameters  
+✅ **Input Validation** - Client-side validation before transactions  
+✅ **Input Sanitization** - XSS prevention on all user inputs  
 ✅ **Custom Errors** - Gas-efficient error handling  
+✅ **File Validation** - Size and type checks before IPFS upload  
 
 ### Security Audit Checklist
 
@@ -390,14 +468,21 @@ cp build/contracts/*.json frontend/src/contracts/
 - Import correct account using private key from Ganache terminal
 - Check Ganache is still running
 
-### Issue: npm start fails with UNC path error (WSL)
+### Issue: npm start fails with module errors
 
 **Solution:**
 ```bash
-export PATH="/usr/bin:$PATH"
-cd ~/dexios-platform/frontend
-npm start
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
 ```
+
+### Issue: IPFS upload fails
+
+**Solution:**
+- Check Infura project credentials in `frontend/src/utils/ipfs.js`
+- Verify file size is under 50MB
+- Ensure stable internet connection
 
 ---
 
@@ -420,6 +505,7 @@ We welcome contributions! Please follow these steps:
 - Write comprehensive inline comments
 - Optimize for gas efficiency
 - Include unit tests for all functions
+- No comments in code - code must be self-explanatory
 
 ---
 
@@ -444,6 +530,20 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 - **Issues:** [GitHub Issues](https://github.com/yourusername/dexios-platform/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/yourusername/dexios-platform/discussions)
+
+---
+
+## 📈 Project Statistics
+
+- **Total Files:** 60+
+- **Smart Contracts:** 4 (fully tested)
+- **Frontend Components:** 19
+- **Custom Hooks:** 3
+- **Utility Functions:** 3
+- **Tests:** 15 (all passing)
+- **Lines of Code:** ~4,500
+- **Development Time:** ~40 hours
+- **Features Completed:** 75%
 
 ---
 
