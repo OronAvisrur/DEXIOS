@@ -39,12 +39,12 @@ const CreateGig = ({ showToast }) => {
 
     setLoading(true);
     try {
-      const hasProfile = await sellerNFT.methods.balanceOf(account).call();
+      const hasProfile = await sellerNFT.methods.hasProfile(account).call();
       
-      if (hasProfile === '0') {
-        showToast('Minting seller profile NFT...', 'info');
+      if (!hasProfile) {
+        showToast('Minting seller profile...', 'info');
         await sellerNFT.methods.mintProfile().send({ from: account });
-        showToast('Profile created successfully!', 'success');
+        showToast('Profile created!', 'success');
       }
 
       showToast('Creating gig...', 'info');
@@ -55,7 +55,7 @@ const CreateGig = ({ showToast }) => {
         formData.description,
         formData.aiModel,
         priceInWei,
-        formData.deliveryTime
+        parseInt(formData.deliveryTime)
       ).send({ from: account });
 
       showToast('Gig created successfully!', 'success');
@@ -69,7 +69,7 @@ const CreateGig = ({ showToast }) => {
       setErrors([]);
     } catch (error) {
       console.error('Create gig error:', error);
-      showToast('Failed to create gig: ' + error.message, 'error');
+      showToast(error.message.includes('denied') ? 'Transaction cancelled' : 'Failed to create gig', 'error');
     } finally {
       setLoading(false);
     }
