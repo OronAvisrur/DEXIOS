@@ -23,32 +23,32 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  cursor: pointer;
+  text-decoration: none;
   letter-spacing: -1px;
 }
 
 .navbar-menu {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
-.navbar-menu button {
-  background: transparent;
+.navbar-link {
   color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
   padding: 10px 20px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
+  transition: all 0.2s;
 }
 
-.navbar-menu button:hover {
+.navbar-link:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
-  transform: none;
-  box-shadow: none;
 }
 
-.navbar-menu button.active {
+.navbar-link.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
@@ -63,4 +63,20 @@
   font-size: 13px;
   font-weight: 600;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: 'Courier New', monospace;
+}
+
+.navbar-connect {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.navbar-connect:hover {
+  box-shadow: 0 4px 20px rgba(118, 75, 162, 0.4);
+  transform: translateY(-1px);
 }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useWeb3 } from '../hooks/useWeb3';
 import './Navbar.css';
 
 const Navbar = () => {
   const { account, connectWallet } = useWeb3();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <nav className="navbar">
@@ -14,36 +14,29 @@ const Navbar = () => {
           DEXIOS
         </Link>
 
-        <button 
-          className="navbar-toggle"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          ☰
-        </button>
-
-        <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
-          <Link to="/marketplace" className="navbar-link">
+        <div className="navbar-menu">
+          <Link to="/marketplace" className={`navbar-link ${location.pathname === '/marketplace' ? 'active' : ''}`}>
             Marketplace
           </Link>
-          <Link to="/create-gig" className="navbar-link">
+          <Link to="/create-gig" className={`navbar-link ${location.pathname === '/create-gig' ? 'active' : ''}`}>
             Create Gig
           </Link>
-          <Link to="/my-gigs" className="navbar-link">
+          <Link to="/my-gigs" className={`navbar-link ${location.pathname === '/my-gigs' ? 'active' : ''}`}>
             My Gigs
           </Link>
-          <Link to="/my-orders" className="navbar-link">
+          <Link to="/my-orders" className={`navbar-link ${location.pathname === '/my-orders' ? 'active' : ''}`}>
             My Orders
           </Link>
-          <Link to="/analytics" className="navbar-link">
+          <Link to="/analytics" className={`navbar-link ${location.pathname === '/analytics' ? 'active' : ''}`}>
             Analytics
           </Link>
-          <Link to="/dashboard" className="navbar-link">
+          <Link to="/dashboard" className={`navbar-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
             Dashboard
           </Link>
 
           {account ? (
             <div className="navbar-account">
-              {account.substring(0, 6)}...{account.substring(38)}
+              {account.slice(0, 6)}...{account.slice(-4)}
             </div>
           ) : (
             <button onClick={connectWallet} className="navbar-connect">
